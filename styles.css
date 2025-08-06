@@ -1,0 +1,47 @@
+body {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #383838;
+}
+
+.game-container {
+  position: relative;
+  width: 400px;
+  height: 400px;
+  overflow: hidden;
+  background-image: url('background.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#frog {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: url('frog.png') no-repeat center;
+  background-size: cover;
+  border-radius: 50%;
+  bottom: 10px;
+  left: 180px;
+  transition: all 0.1s ease;
+}
+
+#goal {
+  position: absolute;
+  top: 10px;
+  width: 1000000px;
+  height: 20px;
+  background-color: rgb(255, 255, 0);
+}
+
+.obstacle {
+  position: absolute;
+  width: 60px;
+  height: 20px;
+  background: url('obstacle.png') no-repeat center;
+  background-size: cover;
+}
