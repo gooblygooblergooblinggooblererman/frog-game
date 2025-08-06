@@ -2,14 +2,68 @@ const frog = document.getElementById('frog');
 const goal = document.getElementById('goal');
 const obstacle1 = document.getElementById('obstacle1');
 const obstacle2 = document.getElementById('obstacle2');
-const obstacle3 = document.getElementById('obstacle3');
 
+// Ensure frog is absolutely positioned so movement works
+frog.style.position = 'absolute';
+frog.style.left = '180px';
+frog.style.top = '350px';
 
-// Initial position and movement direction for obstacle3
-let obstacle3Y = 180;
-let obstacle3Direction = 1; // 1 = down, -1 = up
+let frogX = 180;          // Frog's horizontal position
+let frogY = 350;          // Frog's vertical position
+let obstacle1X = 0;       // First obstacle's starting position (left side)
+let obstacle2X = 20;     // Second obstacle's starting position (right side)
+let gameOver = false;     // Tracks if the game has ended
+let score = 0;            // Player's current score
+let lives = 3;            // Remaining lives
+let gameSpeed = 2;        // Base speed of obstacles
+let level = 1;            // Current level
+let isInvulnerable = false; // Prevents multiple collision detections in quick succession
 
 // ...existing code...
+// Create and style the score display div
+const scoreDisplay = document.createElement('div');
+scoreDisplay.id = 'score';
+scoreDisplay.textContent = `Score: ${score} | Level: ${level}`;
+scoreDisplay.style.position = 'absolute';
+scoreDisplay.style.top = '16px';
+scoreDisplay.style.left = '16px';
+scoreDisplay.style.color = '#fffbe7';
+scoreDisplay.style.fontFamily = "'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Arial Rounded MT Bold', Arial, sans-serif";
+scoreDisplay.style.fontSize = '22px';
+scoreDisplay.style.textShadow = '2px 2px 4px #2e2e2e';
+scoreDisplay.style.background = 'rgba(34, 66, 139, 0.85)'; // Frog green, semi-transparent
+scoreDisplay.style.padding = '10px 22px';
+scoreDisplay.style.borderRadius = '18px';
+scoreDisplay.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+scoreDisplay.style.letterSpacing = '1px';
+scoreDisplay.style.border = '2px solid #fffbe7';
+
+// Create and style the lives display div
+const livesDisplay = document.createElement('div');
+livesDisplay.id = 'lives';
+livesDisplay.textContent = `Lives: ${lives}`;
+livesDisplay.style.position = 'absolute';
+livesDisplay.style.top = '16px';
+livesDisplay.style.right = '16px';
+livesDisplay.style.color = '#fffbe7';
+livesDisplay.style.fontFamily = "'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Arial Rounded MT Bold', Arial, sans-serif";
+livesDisplay.style.fontSize = '22px';
+livesDisplay.style.textShadow = '2px 2px 4px #2e2e2e';
+livesDisplay.style.background = 'rgba(220, 20, 60, 0.85)'; // Crimson, semi-transparent
+livesDisplay.style.padding = '10px 22px';
+livesDisplay.style.borderRadius = '18px';
+livesDisplay.style.boxShadow = '0 4px 16px rgba(0,0,0,0.25)';
+livesDisplay.style.letterSpacing = '1px';
+livesDisplay.style.border = '2px solid #fffbe7';
+
+// Append both divs to the document body
+document.body.appendChild(scoreDisplay);
+document.body.appendChild(livesDisplay);
+
+// Position the goal element
+goal.style.position = 'absolute';
+goal.style.top = '50px';
+goal.style.left = '0px';
 
 // Position obstacle1
 obstacle1.style.position = 'absolute';
@@ -20,10 +74,6 @@ obstacle1.style.left = obstacle1X + 'px';
 obstacle2.style.position = 'absolute';
 obstacle2.style.top = '250px';
 obstacle2.style.left = obstacle2X + 'px';
-
-// Position obstacle3 (center)
-obstacle3.style.left = '180px';
-obstacle3.style.top = obstacle3Y + 'px';
 
 // Listen for keyboard key presses
 document.addEventListener('keydown', function(event) {
@@ -74,7 +124,6 @@ function checkCollision() {
     const frogRect = frog.getBoundingClientRect();
     const obstacle1Rect = obstacle1.getBoundingClientRect();
     const obstacle2Rect = obstacle2.getBoundingClientRect();
-    const obstacle3Rect = obstacle3.getBoundingClientRect();
 
     // Simple AABB collision detection
     if (
@@ -93,13 +142,19 @@ function checkCollision() {
     ) {
         endGame('You hit obstacle 2!');
     }
+}
+
+function checkGoal() {
+    const frogRect = frog.getBoundingClientRect();
+    const goalRect = goal.getBoundingClientRect();
+
     if (
-        frogRect.left < obstacle3Rect.right &&
-        frogRect.right > obstacle3Rect.left &&
-        frogRect.top < obstacle3Rect.bottom &&
-        frogRect.bottom > obstacle3Rect.top
+        frogRect.left < goalRect.right &&
+        frogRect.right > goalRect.left &&
+        frogRect.top < goalRect.bottom &&
+        frogRect.bottom > goalRect.top
     ) {
-        endGame('You hit obstacle 3!');
+        handleGoalCrossed();
     }
 }
 
@@ -114,14 +169,11 @@ function handleGoalCrossed() {
     frogY = 350;
     obstacle1X = 0;
     obstacle2X = 20;
-    obstacle3Y = 180;
-    obstacle3Direction = 1;
 
     frog.style.left = frogX + 'px';
     frog.style.top = frogY + 'px';
     obstacle1.style.left = obstacle1X + 'px';
     obstacle2.style.left = obstacle2X + 'px';
-    obstacle3.style.top = obstacle3Y + 'px';
 
     // Update displays
     scoreDisplay.textContent = `Score: ${score} | Level: ${level}`;
@@ -141,6 +193,12 @@ function endGame(message) {
     scoreDisplay.textContent = `Score: ${score} | Level: ${level}`;
     isInvulnerable = true;
 
+    // Reset obstacle positions
+    obstacle1X = 0;
+    obstacle2X = 20;
+    obstacle1.style.left = obstacle1X + 'px';
+    obstacle2.style.left = obstacle2X + 'px';
+
     alert(`${message}\nScore penalty: -${penalty}`);
 
     if (lives <= 0) {
@@ -150,7 +208,6 @@ function endGame(message) {
         goal.style.display = 'none';
         obstacle1.style.display = 'none';
         obstacle2.style.display = 'none';
-        obstacle3.style.display = 'none';
         scoreDisplay.style.display = 'none';
         livesDisplay.style.display = 'none';
 
@@ -206,8 +263,6 @@ function endGame(message) {
             frogY = 350;
             obstacle1X = 0;
             obstacle2X = 20;
-            obstacle3Y = 180;
-            obstacle3Direction = 1;
             score = 0;
             lives = 3;
             gameSpeed = 2;
@@ -219,7 +274,6 @@ function endGame(message) {
             goal.style.display = '';
             obstacle1.style.display = '';
             obstacle2.style.display = '';
-            obstacle3.style.display = '';
             scoreDisplay.style.display = '';
             livesDisplay.style.display = '';
 
@@ -228,7 +282,6 @@ function endGame(message) {
             frog.style.top = frogY + 'px';
             obstacle1.style.left = obstacle1X + 'px';
             obstacle2.style.left = obstacle2X + 'px';
-            obstacle3.style.top = obstacle3Y + 'px';
 
             // Update displays
             scoreDisplay.textContent = `Score: ${score} | Level: ${level}`;
@@ -266,31 +319,16 @@ function gameLoop() {
     obstacle1X += gameSpeed;
     obstacle2X -= gameSpeed;
 
-    // Move obstacle3 vertically
-    obstacle3Y += gameSpeed * obstacle3Direction;
-
-    // Get obstacle widths/heights (assume 40px if not set)
+    // Get obstacle widths (assume 40px if not set)
     const obstacleWidth1 = obstacle1.offsetWidth || 40;
     const obstacleWidth2 = obstacle2.offsetWidth || 40;
-    const obstacleHeight3 = obstacle3.offsetHeight || 40;
 
     // Wrap obstacles around screen edges only after fully obscured
     if (obstacle1X > 400) obstacle1X = -obstacleWidth1;
     if (obstacle2X < -obstacleWidth2) obstacle2X = 400;
 
-    // Bounce obstacle3 vertically within 0 to 360
-    if (obstacle3Y < 0) {
-        obstacle3Y = 0;
-        obstacle3Direction = 1;
-    }
-    if (obstacle3Y > 360) {
-        obstacle3Y = 360;
-        obstacle3Direction = -1;
-    }
-
     obstacle1.style.left = obstacle1X + 'px';
     obstacle2.style.left = obstacle2X + 'px';
-    obstacle3.style.top = obstacle3Y + 'px';
 
     // Check collision each frame
     checkCollision();
